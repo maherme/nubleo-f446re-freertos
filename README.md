@@ -40,7 +40,10 @@ file foo.elf
 tui enable
 ```
 Other tool you can use is SEGGER SystemView. This tool is already integrated in these projects.  
-The tool is configured for continuous recording (real time recording), the data is sent from the microcontroller using a UART, in this case the USART2 (pins PA2 and PA3) which is the UART connected to the ST-Link USB port.  
-The USART is configured in the file [segger_uart.c](ThirdParty/SEGGER/Rec/segger_uart.c) where you need to specify the core clock frequency, peripheral addresses and the IRQ handler of the UART.  
-When the continuous recording is selected, the SEGGER_SYSVIEW_Start() function do not need to be called because is already used for the [segger_uart.c](ThirdParty/SEGGER/Rec/segger_uart.c) file.  
-If you do not use the continuous recording, you need to store the debug data recorded for the SEGGER SystemView in a region of RAM memory (these buffers are configured in the [SEGGER_RTT_Conf.h](ThirdParty/SEGGER/Config/SEGGER_RTT_Conf.h). Then, export the data from this memory region to a file using a debugger and load this file into the SystemView.
+The tool is configured for continuous recording (real time recording) and for sending data using a UART, in this case the USART2 (pins PA2 and PA3) which is the UART connected to the ST-Link USB port.  
+You need to set SEGGER_UART_REC to 1 in [SEGGER_SYSVIEW_Conf.h](ThirdParty/SEGGER/Config/SEGGER_SYSVIEW_Conf.h) and the USART is configured in the file [segger_uart.c](ThirdParty/SEGGER/Rec/segger_uart.c) where you need to specify the core clock frequency, peripheral addresses and the IRQ handler of the UART.  
+When the continuous recording is selected, the SEGGER_SYSVIEW_Start() function does not need to be called because is already used for the [segger_uart.c](ThirdParty/SEGGER/Rec/segger_uart.c) file.  
+For starting the debug, open SystemView, then select Target->Recorder Cofiguration and select UART, then select ttyACM0 and the configured speed (500000 in these projects). Finally click in the Start Recorder button.
+
+If you use single-shot recording, the recorded debug data for the SEGGER SystemView are stored in a region of RAM memory (these buffers are configured in the [SEGGER_RTT_Conf.h](ThirdParty/SEGGER/Config/SEGGER_RTT_Conf.h)), the address of the buffer is __SEGGER_RTT.aUp[1].pBuffer. You need to export the data (RAW Binary) from this memory region to a file (with extension .SVdat) using a debugger. Now You can load this file into the SystemView.  
+For single-shot recording you do not need to compile the [segger_uart.c](ThirdParty/SEGGER/Rec/segger_uart.c) file, you need to set SEGGER_UART_REC to 0 in [SEGGER_SYSVIEW_Conf.h](ThirdParty/SEGGER/Config/SEGGER_SYSVIEW_Conf.h) and call SEGGER_SYSVIEW_Start().
