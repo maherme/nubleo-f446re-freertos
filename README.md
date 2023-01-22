@@ -39,3 +39,8 @@ monitor reset init
 file foo.elf
 tui enable
 ```
+Other tool you can use is SEGGER SystemView. This tool is already integrated in these projects.  
+The tool is configured for continuous recording (real time recording), the data is sent from the microcontroller using a UART, in this case the USART2 (pins PA2 and PA3) which is the UART connected to the ST-Link USB port.  
+The USART is configured in the file [segger_uart.c](ThirdParty/SEGGER/Rec/segger_uart.c) where you need to specify the core clock frequency, peripheral addresses and the IRQ handler of the UART.  
+When the continuous recording is selected, the SEGGER_SYSVIEW_Start() function do not need to be called because is already used for the [segger_uart.c](ThirdParty/SEGGER/Rec/segger_uart.c) file.  
+If you do not use the continuous recording, you need to store the debug data recorded for the SEGGER SystemView in a region of RAM memory (these buffers are configured in the [SEGGER_RTT_Conf.h](ThirdParty/SEGGER/Config/SEGGER_RTT_Conf.h). Then, export the data from this memory region to a file using a debugger and load this file into the SystemView.
