@@ -238,7 +238,7 @@ static void Button_GPIOInit(void){
 
     GpioBtn.pGPIOx = GPIOC;
     GpioBtn.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_13;
-    GpioBtn.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IT_FT;
+    GpioBtn.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN;
     GpioBtn.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PULL;
 
     GPIO_Init(&GpioBtn);
