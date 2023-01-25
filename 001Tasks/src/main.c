@@ -211,7 +211,7 @@ static void task1_handler(void* parameters){
     char msg[100] = {0};
 
     for(;;){
-        Delay(100); /* Loop for delaying and avoid overload in systemview */
+        Delay(1); /* Loop for delaying and avoid overload in systemview */
         snprintf(msg, 100, "%s\n", (char*)parameters);
         SEGGER_SYSVIEW_PrintfTarget(msg);
 //        printf("%s\n", (char*)parameters);
@@ -224,7 +224,7 @@ static void task2_handler(void* parameters){
     char msg[100] = {0};
 
     for(;;){
-        Delay(100); /* Loop for delaying and avoid overload in systemview */
+        Delay(1); /* Loop for delaying and avoid overload in systemview */
         snprintf(msg, 100, "%s\n", (char*)parameters);
         SEGGER_SYSVIEW_PrintfTarget(msg);
 //        printf("%s\n", (char*)parameters);
