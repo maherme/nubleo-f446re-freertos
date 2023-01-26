@@ -2,7 +2,8 @@
 This is a collection of projects with a FreeRTOS introduced in the [stm32f446re](https://www.st.com/en/microcontrollers-microprocessors/stm32f446re.html) microcontroller from scratch. The board used for testing is the [nucleo-f446re](https://www.st.com/en/evaluation-tools/nucleo-f446re.html).  
 The repository has a [ThirdParty](ThirdParty) folder, where is placed the code of the FreeRTOS and the [SEGGER SystemView](https://www.segger.com/products/development-tools/systemview/) (a tool used to debug the FreeRTOS).  
 On the other hand, each example is coded in a separate folder:
-- [001Tasks](001Tasks): two tasks executed with nothing to do, only some debug information. You can change the time needed for completing a task using a delay function.
+- [001Tasks](001Tasks): two tasks are executed with nothing to do, only some debug information. You can change the time needed for completing a task using a delay function.
+- [002LEDs](002LEDs): three tasks are executed for controlling the blinking of three LEDs (each task controls one LED). You can use a delay function based on a blocking for loop (so the CPU will be busy in the task until it finishes) or an API (```vTaskDelay``` or ```vTaskDelayUntil```) from freeRTOS to free the CPU when a delay is needed (the task is blocked for an specific amount of time).
 
 ## Compiling
 The build enviroment used is [CMake](https://cmake.org/), you will find a CMakeLists.txt file and a separate arm_toolchain.cmake file where the cross copilation toolchain is defined. For compiling the project you can do:
