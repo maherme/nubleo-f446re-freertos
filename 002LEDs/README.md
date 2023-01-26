@@ -13,17 +13,31 @@ The code for the tasks is as follow:
 ```c
 static void LED1_handler(void* parameters){
 
-//    TickType_t last_wakeup_time;
-//    last_wakeup_time = xTaskGetTickCount();
-
     for(;;){
         SEGGER_SYSVIEW_PrintfTarget("Toggling LED1");
         GPIO_ToggleOutputPin(GPIOC, GPIO_PIN_NO_5);
         Delay(400);
-//        vTaskDelay(pdMS_TO_TICKS(400));
-//        vTaskDelayUntil(&last_wakeup_time, pdMS_TO_TICKS(400));
-//        taskYIELD();
     }
 }
 
 ```
+
+If you use the ```vTaskDelay``` function for waiting in each task, you will see the CPU is not blocked in that task and the most of the time the idle task is being executed. YOu can see this behaviour in the two pictures below:
+
+![Alt text](doc/002_Preemptive_2_vTaskDelay.png)
+
+![Alt text](doc/002_Preemptive_3_vTaskDelay.png)
+
+The code for the tasks is as follow:
+```c
+static void LED1_handler(void* parameters){
+
+    for(;;){
+        SEGGER_SYSVIEW_PrintfTarget("Toggling LED1");
+        GPIO_ToggleOutputPin(GPIOC, GPIO_PIN_NO_5);
+        vTaskDelay(pdMS_TO_TICKS(400));
+    }
+}
+```
+
+You can also use the ```vTaskDelayUntil``` where the task is waiting for an absolute amount of time and not a relative one, but for this particular example you will not notice any difference.
