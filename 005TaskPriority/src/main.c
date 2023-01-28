@@ -267,6 +267,7 @@ __attribute__((unused)) static void Delay(uint32_t Delay){
 static void Task1_handler(void* parameters){
 
     for(;;){
+        SEGGER_SYSVIEW_PrintfTarget("LED1 Task");
         GPIO_ToggleOutputPin(GPIOA, GPIO_PIN_NO_5);
         Delay(100);
         switch_priority();
@@ -276,6 +277,7 @@ static void Task1_handler(void* parameters){
 static void Task2_handler(void* parameters){
 
     for(;;){
+        SEGGER_SYSVIEW_PrintfTarget("LED2 Task");
         GPIO_ToggleOutputPin(GPIOA, GPIO_PIN_NO_5);
         Delay(1000);
         switch_priority();
@@ -333,8 +335,6 @@ void Timer_ApplicationEventCallback(Timer_Num_t tim_num, Timer_Event_t timer_eve
 }
 
 void EXTI15_10_Handler(void){
-
-    Delay(200);     /* Prevent debouncing of button */
 
     GPIO_IRQHandling(GPIO_PIN_NO_13);
     traceISR_ENTER();
