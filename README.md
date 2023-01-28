@@ -4,6 +4,8 @@ The repository has a [ThirdParty](ThirdParty) folder, where is placed the code o
 On the other hand, each example is coded in a separate folder:
 - [001Tasks](001Tasks): two tasks are executed with nothing to do, only some debug information. You can change the time needed for completing a task using a delay function.
 - [002LEDs](002LEDs): three tasks are executed for controlling the blinking of three LEDs (each task controls one LED). You can use a delay function based on a blocking for loop (so the CPU will be busy in the task until it finishes) or an API (```vTaskDelay``` or ```vTaskDelayUntil```) from freeRTOS to free the CPU when a delay is needed (the task is blocked for an specific amount of time).
+- [003LEDsNotify](003LEDsNotify): three tasks are executed for controlling the blinking of three LEDs (each task controls one LED) one extra task is executed for sensing a button. When the button is pressed one LED is set to ON (if you press the button three times the three LEDs will be set to ON).
+- [004LEDsNotifyISR](004LEDsNotifyISR): the same as the 003 example but the button is managed using an interruption.
 
 ## Compiling
 The build enviroment used is [CMake](https://cmake.org/), you will find a CMakeLists.txt file and a separate arm_toolchain.cmake file where the cross copilation toolchain is defined. For compiling the project you can do:
