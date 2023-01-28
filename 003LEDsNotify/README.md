@@ -13,6 +13,6 @@ If you use the SEGGER Systemview for debugging or inspecting the tasks behaviour
 
 ![Alt text](doc/003_2_clicks_button.png)
 
-- A more detailed view of the pressed button event is showed here. When this event happens, the button task send a notification to the LED task (in this case the LED1 task) and then, the scheduler pass the control to the LED task, this task delete itself and the idle task come into picture.
+- A more detailed view of the pressed button event is showed here. When this event happens, the button task sends a notification to the LED task (in this case the LED1 task) and then, the scheduler pass the control to the LED task, this task deletes itself and the idle task comes into picture.
 
 ![Alt text](doc/003_1_zoom.png)
