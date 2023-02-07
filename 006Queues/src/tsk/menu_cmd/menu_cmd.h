@@ -5,8 +5,8 @@
 * commands.
 *
 * Public Functions:
-*       - void    void menu_task_handler(void* parameters)
-*       - void    void cmd_task_handler(void* parameters)
+*       - void menu_task_handler(void* parameters)
+*       - void cmd_task_handler(void* parameters)
 */
 
 #ifndef MENU_CMD_H

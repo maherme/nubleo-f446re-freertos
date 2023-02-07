@@ -7,6 +7,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "timers.h"
 #include "rcc_driver.h"
 #include "flash_driver.h"
 #include "pwr_driver.h"
@@ -14,6 +15,7 @@
 #include "usart_driver.h"
 #include "timer_driver.h"
 #include "menu_cmd.h"
+#include "LEDs.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -38,12 +40,18 @@ TaskHandle_t menu_task_handle;
 static TaskHandle_t cmd_task_handle;
 /** @brief Variable for handling the print_task_handler task */
 static TaskHandle_t print_task_handle;
+/** @brief Variable for handling the LED_task_handler task */
+TaskHandle_t LED_task_handle;
 /** @brief Variable for handling the queue used for printing */
 QueueHandle_t q_print;
 /** @brief Variable for handling the queue used for managing the information received by UART */
 QueueHandle_t q_data;
 /** @brief Variable for storing the character received by UART */
 static volatile uint8_t user_data;
+/** @brief Variable for storing the invalid option message */
+const char* msg_invalid = "////Invalid option////\n";
+/** @brief Array for handling the LED timers */
+TimerHandle_t led_timer_handle[4];
 
 /***********************************************************************************************************/
 /*                                       Static Function Prototypes                                        */
@@ -104,6 +112,12 @@ static void USART3_Init(USART_Handle_t* pUSART_Handle);
 static void USART3_GPIOInit(void);
 
 /**
+  * @brief GPIO initialization for LEDs
+  * @return None
+  */
+static void LEDS_GPIOInit(void);
+
+/**
  * @brief Task for printing a message received through a queue
  * @param[in] parameters is a pointer to the input parameters to the task
  * @return None
@@ -135,6 +149,8 @@ int main(void)
     USART_IRQPriorityConfig(IRQ_NO_USART3, 6);
     USART_IRQConfig(IRQ_NO_USART3, ENABLE);
     USART_Enable(USART3, ENABLE);
+    /* Init LED pins */
+    LEDS_GPIOInit();
 
     SEGGER_UART_init(500000);
     SEGGER_SYSVIEW_Conf();
@@ -147,11 +163,21 @@ int main(void)
     configASSERT(status == pdPASS);
     status = xTaskCreate(cmd_task_handler, "Cmd-Task", 250, NULL, 2, &cmd_task_handle);
     configASSERT(status == pdPASS);
+    status = xTaskCreate(LED_task_handler, "LED-Task", 250, NULL, 2, &LED_task_handle);
+    configASSERT(status == pdPASS);
     /* Create queues */
     q_print = xQueueCreate(10, sizeof(size_t));
     configASSERT(q_print != NULL);
     q_data = xQueueCreate(10, sizeof(char));
     configASSERT(q_data != NULL);
+    /* Create software timers for LEDs effect, the id for the timers is a number between 1 and 4 */
+    for(uint8_t i = 0; i < 4; i++){
+        led_timer_handle[i] = xTimerCreate("LED_timer",
+                                           pdMS_TO_TICKS(500),
+                                           pdTRUE,
+                                           (void*)(i+1),
+                                           led_effect_callback);
+    }
 
     (void)USART_ReceiveDataIT(&USART3Handle, (uint8_t*)&user_data, 1);
 
@@ -249,6 +275,27 @@ static void USART3_Init(USART_Handle_t* pUSART_Handle){
     pUSART_Handle->USART_Config.USART_ParityControl = USART_PARITY_DISABLE;
 
     USART_Init(pUSART_Handle);
+}
+
+static void LEDS_GPIOInit(void){
+
+    GPIO_Handle_t LEDSPins;
+
+    memset(&LEDSPins, 0, sizeof(LEDSPins));
+
+    LEDSPins.pGPIOx = GPIOC;
+    LEDSPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
+    LEDSPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
+    LEDSPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PULL;
+    LEDSPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_LOW;
+    LEDSPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_5;
+    GPIO_Init(&LEDSPins);
+    LEDSPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_6;
+    GPIO_Init(&LEDSPins);
+    LEDSPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_7;
+    GPIO_Init(&LEDSPins);
+    LEDSPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_8;
+    GPIO_Init(&LEDSPins);
 }
 
 static void Timer6_Config(void){
