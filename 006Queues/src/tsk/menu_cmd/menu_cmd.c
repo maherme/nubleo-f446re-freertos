@@ -20,6 +20,8 @@
 extern TaskHandle_t menu_task_handle;
 /** @brief Variable for handling the LED_task_handler task */
 extern TaskHandle_t LED_task_handle;
+/** @brief Variable for handling the rtc_task_handler task */
+extern TaskHandle_t rtc_task_handle;
 /** @brief Variable for handling the queue used for printing */
 extern QueueHandle_t q_print;
 /** @brief Variable for handling the queue used for managing the information received by UART */
@@ -80,7 +82,7 @@ void menu_task_handler(void* parameters){
                     break;
                 case 1:
                     curr_state = sRtcMenu;
-//                    xTaskNotify(rtc_task_handle, 0, eNoAction);
+                    xTaskNotify(rtc_task_handle, 0, eNoAction);
                     break;
                 case 2:
                     break;
@@ -129,7 +131,7 @@ static void process_command(command_s* cmd){
         case sRtcTimeConfig:
         case sRtcDateConfig:
         case sRtcReport:
-//            xTaskNotify(rtc_task_handle, (uint32_t)cmd, eSetValueWithOverwrite);
+            xTaskNotify(rtc_task_handle, (uint32_t)cmd, eSetValueWithOverwrite);
             break;
         default:
             break;

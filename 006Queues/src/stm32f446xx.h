@@ -440,6 +440,34 @@ typedef struct
     volatile uint32_t FCR;          /**< @brief FIFO control register      Address offset 0x24 */
 }DMA_Stream_RegDef_t;
 
+/**
+ * @brief Peripheral register definition structure for RTC
+ */
+typedef struct
+{
+    volatile uint32_t TR;           /**< @brief Time register                       Address offset 0x00 */
+    volatile uint32_t DR;           /**< @brief Date register                       Address offset 0x04 */
+    volatile uint32_t CR;           /**< @brief Control register                    Address offset 0x08 */
+    volatile uint32_t ISR;          /**< @brief Initialization and status register  Address offset 0x0C */
+    volatile uint32_t PRER;         /**< @brief Prescaler register                  Address offset 0x10 */
+    volatile uint32_t WUTR;         /**< @brief Wakeup timer register               Address offset 0x14 */
+    volatile uint32_t CALIBR;       /**< @brief Calibration register                Address offset 0x18 */
+    volatile uint32_t ALRMAR;       /**< @brief Alarm A register                    Address offset 0x1C */
+    volatile uint32_t ALRMBR;       /**< @brief Alarm B register                    Address offset 0x20 */
+    volatile uint32_t WPR;          /**< @brief Write protection register           Address offset 0x24 */
+    volatile uint32_t SSR;          /**< @brief Sub second register                 Address offset 0x28 */
+    volatile uint32_t SHIFTR;       /**< @brief Shift control register              Address offset 0x2C */
+    volatile uint32_t TSTR;         /**< @brief Time stamp time register            Address offset 0x30 */
+    volatile uint32_t TSDR;         /**< @brief Time stamp date register            Address offset 0x34 */
+    volatile uint32_t TSSSR;        /**< @brief Timestamp sub second register       Address offset 0x38 */
+    volatile uint32_t CALR;         /**< @brief Calibration register                Address offset 0x3C */
+    volatile uint32_t TAFCR;        /**< @brief Tamper and alt function conf reg    Address offset 0x40 */
+    volatile uint32_t ALRMASSR;     /**< @brief Alarm A sub second register         Address offset 0x44 */
+    volatile uint32_t ALRMBSSR;     /**< @brief Alarm B sub second register         Address offset 0x48 */
+    volatile uint32_t RESERVED;     /**< @brief Reserved                            Address offset 0x4C */
+    volatile uint32_t BKPxR[20];    /**< @brief Backup register x                   Address offset 0x50 */
+}RTC_RegDef_t;
+
 /***********************************************************************************************************/
 /*                          Bit Position Definition of Peripheral Register                                 */
 /***********************************************************************************************************/
@@ -1108,6 +1136,109 @@ typedef struct
 #define DMA_SFCR_FEIE       7   /**< @brief FIFO error interrupt enable */
 /** @} */
 
+/**
+ * @name Bit position definition RTC time register
+ * @{
+ */
+#define RTC_TR_SU           0   /**< @brief Seconds units in BCD format */
+#define RTC_TR_ST           4   /**< @brief Seconds tens in BCD format */
+#define RTC_TR_MNU          8   /**< @brief Minute units in BCD format */
+#define RTC_TR_MNT          12  /**< @brief Minute tens in BCD format */
+#define RTC_TR_HU           16  /**< @brief Hours units in BCD format */
+#define RTC_TR_HT           20  /**< @brief Hours tens in BCD format */
+#define RTC_TR_PM           22  /**< @brief AM/PM notation */
+/** @} */
+
+/**
+ * @name Bit position definition RTC date register
+ * @{
+ */
+#define RTC_DR_DU           0   /**< @brief Date units in BCD format */
+#define RTC_DR_DT           4   /**< @brief Date tens in BCD format */
+#define RTC_DR_MU           8   /**< @brief Month units in BCD format */
+#define RTC_DR_MT           12  /**< @brief Month tens in BCD format */
+#define RTC_DR_WDU          13  /**< @brief Week day units */
+#define RTC_DR_YU           16  /**< @brief Year units in BCD format */
+#define RTC_DR_YT           20  /**< @brief Year tens in BCD format */
+/** @} */
+
+/**
+ * @name Bit position definition RTC control register
+ * @{
+ */
+#define RTC_CR_WUCKSEL      0   /**< @brief Wakeup clock selection */
+#define RTC_CR_TSEDGE       3   /**< @brief Timestamp event active edge */
+#define RTC_CR_REFCKON      4   /**< @brief Reference clock detection enable */
+#define RTC_CR_BYPSHAD      5   /**< @brief Bypass the shadow registers */
+#define RTC_CR_FMT          6   /**< @brief Hour format */
+#define RTC_CR_DCE          7   /**< @brief Coarse digital calibration enable */
+#define RTC_CR_ALRAE        8   /**< @brief Alarm A enable */
+#define RTC_CR_ALRBE        9   /**< @brief Alarm B enable */
+#define RTC_CR_WUTE         10  /**< @brief Wakeup timer enable */
+#define RTC_CR_TSE          11  /**< @brief Time stamp enable */
+#define RTC_CR_ALRAIE       12  /**< @brief Alarm A interrupt enable */
+#define RTC_CR_ALRBIE       13  /**< @brief Alarm B interrupt enable */
+#define RTC_CR_WUTIE        14  /**< @brief Wakeup timer interrupt enable */
+#define RTC_CR_TSIE         15  /**< @brief Timestamp interrupt enable */
+#define RTC_CR_ADD1H        16  /**< @brief Add 1hour */
+#define RTC_CR_SUB1H        17  /**< @brief Subtract 1hour */
+#define RTC_CR_BKP          18  /**< @brief Backup */
+#define RTC_CR_COSEL        19  /**< @brief Calibration output selection */
+#define RTC_CR_POL          20  /**< @brief Output polarity */
+#define RTC_CR_OSEL         21  /**< @brief Output selection */
+#define RTC_CR_COE          23  /**< @brief Calibration output enable */
+/** @} */
+
+/**
+ * @name Bit position definition RTC initialization and status register
+ * @{
+ */
+#define RTC_ISR_ALRAWF      0   /**< @brief Alarm A write flag */
+#define RTC_ISR_ALRBWF      1   /**< @brief Alarm B write flag */
+#define RTC_ISR_WUTWF       2   /**< @brief Wakeup timer write flag */
+#define RTC_ISR_SHPF        3   /**< @brief Shift operation pending */
+#define RTC_ISR_INITS       4   /**< @brief Initialization status flag */
+#define RTC_ISR_RSF         5   /**< @brief Registers synchronization flag */
+#define RTC_ISR_INITF       6   /**< @brief Initialization flag */
+#define RTC_ISR_INIT        7   /**< @brief Initialization mode */
+#define RTC_ISR_ALRAF       8   /**< @brief Alarm A flag */
+#define RTC_ISR_ALRBF       9   /**< @brief Alarm B flag */
+#define RTC_ISR_WUTF        10  /**< @brief Wakeup timer flag */
+#define RTC_ISR_TSF         11  /**< @brief Timestamp flag */
+#define RTC_ISR_TSOVF       12  /**< @brief Timestamp overflow flag */
+#define RTC_ISR_TAMP1F      13  /**< @brief Tamper detection flag */
+#define RTC_ISR_TAMP2F      14  /**< @brief Tamper2 detection flag */
+#define RTC_ISR_RECALPF     16  /**< @brief Recalibration pending flag */
+/** @} */
+
+/**
+ * @name Bit position definition RTC prescaler register
+ * @{
+ */
+#define RTC_PRER_PREDIV_S   0   /**< @brief Synchronous prescaler factor */
+#define RTC_PRER_PREDIV_A   16  /**< @brief Asynchronous prescaler factor */
+/** @} */
+
+/**
+ * @name Bit position definition RTC alarm x register
+ * @{
+ */
+#define RTC_ALRMxR_SU       0   /**< @brief Second units in BCD format */
+#define RTC_ALRMxR_ST       4   /**< @brief Second tens in BCD format */
+#define RTC_ALRMxR_MSK1     7   /**< @brief Alarm x seconds mask */
+#define RTC_ALRMxR_MNU      8   /**< @brief Minute units in BCD format */
+#define RTC_ALRMxR_MNT      12  /**< @brief Minute tens in BCD format */
+#define RTC_ALRMxR_MSK2     15  /**< @brief Alarm x minutes mask */
+#define RTC_ALRMxR_HU       16  /**< @brief Hour units in BCD format */
+#define RTC_ALRMxR_HT       20  /**< @brief Hour tens in BCD format */
+#define RTC_ALRMxR_PM       22  /**< @brief AM/PM notation */
+#define RTC_ALRMxR_MSK3     23  /**< @brief Alarm x hours mask */
+#define RTC_ALRMxR_DU       24  /**< @brief Date units or day in BCD format */
+#define RTC_ALRMxR_DT       28  /**< @brief Date tens in BCD format */
+#define RTC_ALRMxR_WDSEL    30  /**< @brief Week day selection */
+#define RTC_ALRMxR_MSK4     31  /**< @brief Alarm x date mask */
+/** @} */
+
 /***********************************************************************************************************/
 /*          Peripheral definitions (peripheral base addresses typecasted to xxx_RegDef_t)                  */
 /***********************************************************************************************************/
@@ -1191,6 +1322,8 @@ typedef struct
 #define DMA2_STR7   ((DMA_Stream_RegDef_t*)DMA2_STR7_BASEADDR)  /**< @brief DMA2 str7 base addr reg def */
 
 #define PWR         ((PWR_RegDef_t*)PWR_BASEADDR)               /**< @brief PWR base addr reg def */
+
+#define RTC         ((RTC_RegDef_t*)RTCBKP_BASEADDR)            /**< @brief RTC base addr reg definition */
 /** @} */
 
 /***********************************************************************************************************/
@@ -1292,6 +1425,13 @@ typedef struct
 /** @} */
 
 /**
+ * @name Clock enable macros for RTC peripheral
+ * @{
+ */
+#define RTC_PCLK_EN()       (RCC->BDCR |= (1 << 15))    /**< @brief clock enable for RTC */
+/** @} */
+
+/**
  * @name Clock disable macros for GPIOx peripheral.
  * @{
  */
@@ -1383,6 +1523,13 @@ typedef struct
  */
 #define DMA1_PCLK_DI()      (RCC->AHB1ENR &= ~(1 << 21))    /**< @brief Clock disable for DMA1 */
 #define DMA2_PCLK_DI()      (RCC->AHB1ENR &= ~(1 << 22))    /**< @brief Clock disable for DMA2 */
+/** @} */
+
+/**
+ * @name Clock disable macros for RTC peripheral
+ * @{
+ */
+#define RTC_PCLK_DI()       (RCC->BDCR &= ~(1 << 15))       /**< @brief clock disable for RTC */
 /** @} */
 
 /**
@@ -1576,6 +1723,7 @@ typedef struct
 #define IRQ_DMA2_STREAM5            68  /**< @brief Interrupt Num for DMA2 Stream5 */
 #define IRQ_DMA2_STREAM6            69  /**< @brief Interrupt Num for DMA2 Stream6 */
 #define IRQ_DMA2_STREAM7            70  /**< @brief Interrupt Num for DMA2 Stream7 */
+#define IRQ_RTC_ALARM               41  /**< @brief Interrupt Num for RTC alarm */
 /** @} */
 
 /**

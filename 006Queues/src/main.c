@@ -14,8 +14,10 @@
 #include "gpio_driver.h"
 #include "usart_driver.h"
 #include "timer_driver.h"
+#include "rtc_driver.h"
 #include "menu_cmd.h"
 #include "LEDs.h"
+#include "RTC.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -29,7 +31,9 @@ static Timer_Handle_t Timer = {0};
 static uint32_t tick = 0;
 
 /** @brief Handler structure for USART peripheral */
-static USART_Handle_t USART3Handle;
+static USART_Handle_t USART3Handle = {0};
+/** @brief Structure for RTC configuration */
+static RTC_Config_t RTC_Cfg = {0};
 
 /** @brief Extern function for initialize the UART for SEGGER SystemView */
 extern void SEGGER_UART_init(uint32_t);
@@ -40,6 +44,8 @@ TaskHandle_t menu_task_handle;
 static TaskHandle_t cmd_task_handle;
 /** @brief Variable for handling the print_task_handler task */
 static TaskHandle_t print_task_handle;
+/** @brief Variable for handling the rtc_task_handler task */
+TaskHandle_t rtc_task_handle;
 /** @brief Variable for handling the LED_task_handler task */
 TaskHandle_t LED_task_handle;
 /** @brief Variable for handling the queue used for printing */
@@ -52,6 +58,8 @@ static volatile uint8_t user_data;
 const char* msg_invalid = "////Invalid option////\n";
 /** @brief Array for handling the LED timers */
 TimerHandle_t led_timer_handle[4];
+/** @brief handler for managing the RTC timer */
+TimerHandle_t rtc_timer;
 
 /***********************************************************************************************************/
 /*                                       Static Function Prototypes                                        */
@@ -118,6 +126,18 @@ static void USART3_GPIOInit(void);
 static void LEDS_GPIOInit(void);
 
 /**
+ * @brief Function for setting the intial values to the RTC_Cfg structure
+ * @return None
+ */
+static void RTC_Time_Init(void);
+
+/**
+ * @brief Function for configure and initialize the RTC peripheral
+ * @return None
+ */
+static void RTC_Config(void);
+
+/**
  * @brief Task for printing a message received through a queue
  * @param[in] parameters is a pointer to the input parameters to the task
  * @return None
@@ -151,6 +171,8 @@ int main(void)
     USART_Enable(USART3, ENABLE);
     /* Init LED pins */
     LEDS_GPIOInit();
+    /* Init RTC */
+    RTC_Config();
 
     SEGGER_UART_init(500000);
     SEGGER_SYSVIEW_Conf();
@@ -165,6 +187,8 @@ int main(void)
     configASSERT(status == pdPASS);
     status = xTaskCreate(LED_task_handler, "LED-Task", 250, NULL, 2, &LED_task_handle);
     configASSERT(status == pdPASS);
+    status = xTaskCreate(rtc_task_handler, "Rtc-Task", 250, NULL, 2, &rtc_task_handle);
+    configASSERT(status == pdPASS);
     /* Create queues */
     q_print = xQueueCreate(10, sizeof(size_t));
     configASSERT(q_print != NULL);
@@ -178,6 +202,8 @@ int main(void)
                                            (void*)(i+1),
                                            led_effect_callback);
     }
+    /* Create software timer for RTC */
+    rtc_timer = xTimerCreate ("rtc_report_timer", pdMS_TO_TICKS(1000), pdTRUE,NULL, rtc_report_callback);
 
     (void)USART_ReceiveDataIT(&USART3Handle, (uint8_t*)&user_data, 1);
 
@@ -298,6 +324,40 @@ static void LEDS_GPIOInit(void){
     GPIO_Init(&LEDSPins);
 }
 
+static void RTC_Time_Init(void){
+
+    RTC_Cfg.RTC_HoursFormat = RTC_AM_PM;
+    RTC_Cfg.RTC_Time.SecondUnits = 0;
+    RTC_Cfg.RTC_Time.SecondTens = 5;
+    RTC_Cfg.RTC_Time.MinuteUnits = 9;
+    RTC_Cfg.RTC_Time.MinuteTens = 5;
+    RTC_Cfg.RTC_Time.HourUnits = 1;
+    RTC_Cfg.RTC_Time.HourTens = 1;
+    RTC_Cfg.RTC_Time.PM = 1;
+    RTC_Cfg.RTC_Date.YearUnits = 8;
+    RTC_Cfg.RTC_Date.YearTens = 9;
+    RTC_Cfg.RTC_Date.MonthUnits = 2;
+    RTC_Cfg.RTC_Date.MonthTens = 1;
+    RTC_Cfg.RTC_Date.DateUnits = 1;
+    RTC_Cfg.RTC_Date.DateTens = 3;
+}
+
+static void RTC_Config(void){
+
+    /* Turn on required input clock */
+    RCC->CSR |= (1 << 0);
+    while(!(RCC->CSR & (1 << 1)));
+
+    /* Select clock source */
+    RTC_ClkSource(RCC_LSI_SOURCE);
+
+    RTC_PerClkCtrl(ENABLE);
+
+    RTC_Time_Init();
+
+    RTC_Init(RTC_Cfg);
+}
+
 static void Timer6_Config(void){
 
     Timer.tim_num = TIMER6;
@@ -337,7 +397,7 @@ static void print_task_handler(void* parameters){
 
     for(;;){
         xQueueReceive(q_print, &msg, portMAX_DELAY);
-        (void)USART_SendDataIT(&USART3Handle, (uint8_t*)msg, strlen((char*)msg));
+        (void)USART_SendData(&USART3Handle, (uint8_t*)msg, strlen((char*)msg));
     }
 }
 
