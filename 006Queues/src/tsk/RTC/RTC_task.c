@@ -379,7 +379,7 @@ static void show_time_date(void){
     xQueueSend(q_print, &current_time, portMAX_DELAY);
 
     /* Display date Format : date-month-year */
-    sprintf((char*)showdate, "%d%d-%d%d-%d%d\n",
+    sprintf((char*)showdate, "\t\t\t%d%d-%d%d-%d%d\n",
             date.YearTens, date.YearUnits,
             date.MonthTens, date.MonthUnits,
             date.DateTens, date.DateUnits);
