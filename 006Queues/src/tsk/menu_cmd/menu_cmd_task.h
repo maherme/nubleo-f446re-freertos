@@ -1,5 +1,5 @@
 /********************************************************************************************************//**
-* @file menu_cmd.h
+* @file menu_cmd_task.h
 *
 * @brief Header file containing the prototypes of the APIs for managing the main menu and the received
 * commands.

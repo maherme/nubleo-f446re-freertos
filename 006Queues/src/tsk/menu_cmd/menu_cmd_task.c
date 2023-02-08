@@ -1,5 +1,5 @@
 /********************************************************************************************************//**
-* @file menu_cmd.c
+* @file menu_cmd_task.c
 *
 * @brief File containing the APIs for managing the main menu and the received commands.
 *
@@ -11,7 +11,7 @@
 *       For further information about functions refer to the corresponding header file.
 */
 
-#include "menu_cmd.h"
+#include "menu_cmd_task.h"
 #include "FreeRTOS.h"
 #include "queue.h"
 #include <stdint.h>

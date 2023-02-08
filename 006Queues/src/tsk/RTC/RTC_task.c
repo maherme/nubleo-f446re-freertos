@@ -1,5 +1,5 @@
 /********************************************************************************************************//**
-* @file RTC.c
+* @file RTC_task.c
 *
 * @brief File containing the APIs for managing the task regarding the real time clock.
 *
@@ -11,8 +11,8 @@
 *       For further information about functions refer to the corresponding header file.
 */
 
-#include "RTC.h"
-#include "menu_cmd.h"
+#include "RTC_task.h"
+#include "menu_cmd_task.h"
 #include "FreeRTOS.h"
 #include "queue.h"
 #include "timers.h"

@@ -15,9 +15,9 @@
 #include "usart_driver.h"
 #include "timer_driver.h"
 #include "rtc_driver.h"
-#include "menu_cmd.h"
-#include "LEDs.h"
-#include "RTC.h"
+#include "menu_cmd_task.h"
+#include "LEDs_task.h"
+#include "RTC_task.h"
 #include <stdio.h>
 #include <string.h>
 

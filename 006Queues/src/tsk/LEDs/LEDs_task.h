@@ -1,16 +1,16 @@
 /********************************************************************************************************//**
-* @file RTC.h
+* @file LEDs_task.h
 *
-* @brief Header file containing the prototypes of the APIs for managing the task regarding the real time
-* clock.
+* @brief Header file containing the prototypes of the APIs for managing the task regarding the control of
+* LEDs
 *
 * Public Functions:
-*       - void rtc_task_handler(void* parameters)
-*       - void rtc_report_callback(TimerHandle_t xTimer)
+*       - void LED_task_handler(void* parameters)
+*       - void led_effect_callback(TimerHandle_t xTimer)
 */
 
-#ifndef RTC_H
-#define RTC_H
+#ifndef LEDs_H
+#define LEDs_H
 
 #include "FreeRTOS.h"
 #include "timers.h"
@@ -20,17 +20,17 @@
 /***********************************************************************************************************/
 
 /**
- * @brief Task for printing the RTC control menu and managing the received command.
+ * @brief Task for printing the LEDs control menu and managing the received command.
  * @param[in] parameters is a pointer to the input parameters to the task
  * @return None
  */
-void rtc_task_handler(void* parameters);
+void LED_task_handler(void* parameters);
 
 /**
- * @brief Callback function for reporting information of the RTC when the timer expires.
+ * @brief Callback function for managing the effect of the LEDs when the timer expires.
  * @param[out] xTimer is the timer handler.
  * @return None
  */
-void rtc_report_callback(TimerHandle_t xTimer);
+void led_effect_callback(TimerHandle_t xTimer);
 
-#endif /* RTC_H  */
+#endif /* LEDs_H */

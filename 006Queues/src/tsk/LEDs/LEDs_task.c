@@ -1,5 +1,5 @@
 /********************************************************************************************************//**
-* @file LEDs.c
+* @file LEDs_task.c
 *
 * @brief File containing the APIs for managing the task regarding the control of LEDs
 *
@@ -11,8 +11,8 @@
 *       For further information about functions refer to the corresponding header file.
 */
 
-#include "LEDs.h"
-#include "menu_cmd.h"
+#include "LEDs_task.h"
+#include "menu_cmd_task.h"
 #include "FreeRTOS.h"
 #include "queue.h"
 #include "timers.h"
