@@ -38,3 +38,15 @@ In this project five tasks are scheduled for managing four LEDs and the RTC peri
   Exit                      ----> 3
   Enter your choice here : 
   ```
+
+## Testing
+
+For testing this project you need to follow the connection diagram below:
+
+![Alt text](doc/006Queues_connection.png)
+
+You can use minicom software to open a terminal (use the tty device corresponding to your UART port):
+```console
+sudo minicom -D /dev/ttyUSB0
+```
+In order to watch the data in the right way you must enable ```Add Carriage Ret...U``` and ```local Echo on/off..E``` in the configuration menu (press Ctrl-A Z for entering in this menu).
