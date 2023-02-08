@@ -346,6 +346,8 @@ static void show_time_date(void){
     memset(&date, 0, sizeof(date));
     memset(&time, 0, sizeof(time));
 
+    /* Wait until the RTC time and date register are synchronized */
+    while(!RTC_GetRSF());
     /* Get the RTC current Time */
     RTC_GetTime(&time);
     /* Get the RTC current Date */
