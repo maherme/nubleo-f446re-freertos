@@ -39,6 +39,8 @@ In this project five tasks are scheduled for managing four LEDs and the RTC peri
   Enter your choice here : 
   ```
 
+The objective of this example is the usage of the queues as communication method between tasks. So functions as ```xQueueCreate```, ```xQueueSend```, ```xQueueSendFromISR```, ```xQueueReceive```, ```xQueueReceiveFromISR``` and other functions related with queues are used. Also software timers are used, you can see functios as ```xTimerCreate```, ```xTimerStart```, ```xTimerStop``` or ```xTimerIsTimerActive``` in the code for managing time.
+
 ## Testing
 
 For testing this project you need to follow the connection diagram below:
