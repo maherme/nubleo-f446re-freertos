@@ -51,6 +51,7 @@ extern TaskHandle_t menu_task_handle;
 /** @brief handler for managing the RTC timer */
 extern TimerHandle_t rtc_timer;
 
+/** @brief Message printed when the RTC date or time configuration is OK */
 static const char *msg_conf = "Configuration successful\n";
 
 /***********************************************************************************************************/
