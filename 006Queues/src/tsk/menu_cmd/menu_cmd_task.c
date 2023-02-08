@@ -155,7 +155,7 @@ static uint8_t extract_command(command_s* cmd){
     }while(item != '\r');
 
     cmd->payload[i-1] = '\0';
-    cmd ->len = i-1;
+    cmd->len = i-1;
 
     return 0;
 }
