@@ -41,6 +41,24 @@ In this project five tasks are scheduled for managing four LEDs and the RTC peri
 
 The objective of this example is the usage of the queues as communication method between tasks. So functions as ```xQueueCreate```, ```xQueueSend```, ```xQueueSendFromISR```, ```xQueueReceive```, ```xQueueReceiveFromISR``` and other functions related with queues are used. Also software timers are used, you can see functios as ```xTimerCreate```, ```xTimerStart```, ```xTimerStop``` or ```xTimerIsTimerActive``` in the code for managing time.
 
+For a better understanding of this example, you can find here a diagram about the tasks and the communications:
+```mermaid
+  sequenceDiagram
+  Menu-Task-->>Print-Task: xQueueSend
+  Print-Task-->>UART-RxTx: USART_SendData
+  UART-RxTx-->>Cmd-Task: xQueueSend
+  UART-RxTx->>Cmd-Task: xTaskNotifyFromISR
+  Cmd-Task->>Menu-Task: xTaskNotify
+  Cmd-Task->>LEDs-Task: xTaskNotify
+  Cmd-Task->>RTC-Task: xTaskNotify
+  Menu-Task->>LEDs-Task: xTaskNotify
+  LEDs-Task-->>Print-Task: xQueueSend
+  LEDs-Task->>Menu-Task: xTaskNotify
+  Menu-Task->>RTC-Task: xTaskNotify
+  RTC-Task-->>Print-Task: xQueueSend
+  RTC-Task->>Menu-Task: xTaskNotify
+```
+
 ## Testing
 
 For testing this project you need to follow the connection diagram below:
