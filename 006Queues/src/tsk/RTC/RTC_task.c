@@ -27,7 +27,8 @@
 typedef enum{
     RTC_HH_CONFIG,      /**< Hours configuration state */
     RTC_MM_CONFIG,      /**< Minutes configuration state */
-    RTC_SS_CONFIG       /**< Seconds configuration state */
+    RTC_SS_CONFIG,      /**< Seconds configuration state */
+    RTC_PM_CONFIG       /**< AM/PM configuration state */
 }RTC_TimeState_t;
 
 /**
@@ -223,8 +224,9 @@ static void set_rtc_time(command_s* cmd){
 
     const char *msg_rtc_mm = "Enter minutes(0-59):";
     const char *msg_rtc_ss = "Enter seconds(0-59):";
+    const char *msg_rtc_pm = "Enter 0 for AM or 1 for PM:";
     static RTC_TimeState_t rtc_time_state = RTC_HH_CONFIG;
-    uint8_t hour, min, sec;
+    uint8_t hour, min, sec, pm;
     static RTC_Time_t time;
 
     switch(rtc_time_state){
@@ -246,6 +248,12 @@ static void set_rtc_time(command_s* cmd){
             sec = getnumber(cmd->payload, cmd->len);
             time.SecondUnits = sec % 10;
             time.SecondTens = (sec - time.SecondUnits)/10;
+            rtc_time_state = RTC_PM_CONFIG;
+            xQueueSend(q_print, &msg_rtc_pm, portMAX_DELAY);
+            break;
+        case RTC_PM_CONFIG:
+            pm = getnumber(cmd->payload, cmd->len);
+            time.PM = pm;
             if(!validate_rtc_information(&time, NULL)){
                 RTC_SetTime(time);
                 xQueueSend(q_print, &msg_conf, portMAX_DELAY);
