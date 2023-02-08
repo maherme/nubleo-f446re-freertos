@@ -116,10 +116,10 @@ void LED_task_handler(void* parameters){
     uint32_t cmd_addr;
     command_s* cmd;
     const char* msg_led = "========================\n"
-                        "|      LED Effect     |\n"
-                        "========================\n"
-                        "(none,e1,e2,e3,e4)\n"
-                        "Enter your choice here : ";
+                          "|      LED Effect      |\n"
+                          "========================\n"
+                          "(none,e1,e2,e3,e4)\n"
+                          "Enter your choice here : ";
 
     for(;;){
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
