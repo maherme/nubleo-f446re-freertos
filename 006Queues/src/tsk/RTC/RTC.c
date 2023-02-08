@@ -21,13 +21,24 @@
 #include <string.h>
 #include <stdio.h>
 
-#define RCC_HH_CONFIG     0
-#define RCC_MM_CONFIG     1
-#define RCC_SS_CONFIG     2
-#define RCC_DATE_CONFIG   0
-#define RCC_MONTH_CONFIG  1
-#define RCC_YEAR_CONFIG   2
-#define RCC_DAY_CONFIG    3
+/**
+ * @brief Enum for managing the states of the FSM for configuring the time
+ */
+typedef enum{
+    RTC_HH_CONFIG,      /**< Hours configuration state */
+    RTC_MM_CONFIG,      /**< Minutes configuration state */
+    RTC_SS_CONFIG       /**< Seconds configuration state */
+}RTC_TimeState_t;
+
+/**
+ * @brief Enum for managing the states of the FSM for configuring the date
+ */
+typedef enum{
+    RTC_DATE_CONFIG,    /**< Date configuration state */
+    RTC_MONTH_CONFIG,   /**< Month configuration state */
+    RTC_DAY_CONFIG,     /**< Day of the week configuration state */
+    RTC_YEAR_CONFIG     /**< Year configuration state */
+}RTC_DateState_t;
 
 /** @brief Variable for handling the queue used for printing */
 extern QueueHandle_t q_print;
@@ -40,9 +51,39 @@ extern TaskHandle_t menu_task_handle;
 /** @brief handler for managing the RTC timer */
 extern TimerHandle_t rtc_timer;
 
+static const char *msg_conf = "Configuration successful\n";
+
 /***********************************************************************************************************/
 /*                                       Static Function Prototypes                                        */
 /***********************************************************************************************************/
+
+/**
+ * @brief Function for processing the received RTC command
+ * @param[in] cmd is a struct pointer with the received command information
+ * @return None
+ */
+static void proc_rtc_cmd(command_s* cmd);
+
+/**
+ * @brief Function for configuring the RTC time
+ * @param[in] cmd is a struct pointer with the received command information
+ * @return None
+ */
+static void set_rtc_time(command_s* cmd);
+
+/**
+ * @brief Function for configuring the RTC date
+ * @param[in] cmd is a struct pointer with the received command information
+ * @return None
+ */
+static void set_rtc_date(command_s* cmd);
+
+/**
+ * @brief Function for enabling the RTC report
+ * @param[in] cmd is a struct pointer with the received command information
+ * @return None
+ */
+static void set_rtc_report(command_s* cmd);
 
 /**
  * @brief Function for getting the current time and date of the RTC and sending to the print task via queue.
@@ -87,24 +128,8 @@ void rtc_task_handler(void* parameters){
                            "Enable reporting          ----> 2\n"
                            "Exit                      ----> 3\n"
                            "Enter your choice here : ";
-    const char *msg_rtc_hh = "Enter hour(1-12):";
-    const char *msg_rtc_mm = "Enter minutes(0-59):";
-    const char *msg_rtc_ss = "Enter seconds(0-59):";
-    const char *msg_rtc_dd  = "Enter date(1-31):";
-    const char *msg_rtc_mo  ="Enter month(1-12):";
-    const char *msg_rtc_dow  = "Enter day(1-7 sun:1):";
-    const char *msg_rtc_yr  = "Enter year(0-99):";
-    const char *msg_conf = "Configuration successful\n";
-    const char *msg_rtc_report = "Enable time&date reporting(y/n)?: ";
-
-   uint32_t cmd_addr;
-   command_s *cmd;
-   static uint8_t rtc_state = 0;
-   uint8_t menu_code;
-   RTC_Time_t time;
-   RTC_Date_t date;
-   uint8_t hour, min, sec;
-   uint8_t d, month, day, year;
+    uint32_t cmd_addr;
+    command_s *cmd;
 
     for(;;){
         /* Notify wait (wait till someone notifies) */
@@ -121,133 +146,22 @@ void rtc_task_handler(void* parameters){
 
             switch(curr_state){
                 case sRtcMenu:
-                      /*process RTC menu commands */
-                      if(cmd->len == 1){
-                          menu_code = cmd->payload[0] - 48;
-                          switch(menu_code){
-                              case 0:
-                                  curr_state = sRtcTimeConfig;
-                                  xQueueSend(q_print, &msg_rtc_hh, portMAX_DELAY);
-                                  break;
-                              case 1:
-                                  curr_state = sRtcDateConfig;
-                                  xQueueSend(q_print, &msg_rtc_dd, portMAX_DELAY);
-                                  break;
-                              case 2 :
-                                  curr_state = sRtcReport;
-                                  xQueueSend(q_print, &msg_rtc_report, portMAX_DELAY);
-                                  break;
-                              case 3 :
-                                  curr_state = sMainMenu;
-                                  break;
-                              default:
-                                  curr_state = sMainMenu;
-                                  xQueueSend(q_print ,&msg_invalid, portMAX_DELAY);
-                          }
-                      }
-                      else{
-                          curr_state = sMainMenu;
-                          xQueueSend(q_print, &msg_invalid, portMAX_DELAY);
-                      }
-                      break;
+                    /* Process RTC menu commands */
+                    proc_rtc_cmd(cmd);
+                    break;
                 case sRtcTimeConfig:
                     /* Get hh, mm, ss infor and configure RTC */
                     /* Take care of invalid entries */
-                    switch(rtc_state){
-                        case RCC_HH_CONFIG:
-                            hour = getnumber(cmd->payload, cmd->len);
-                            time.HourUnits = hour % 10;
-                            time.HourTens = (hour - time.HourUnits)/10;
-                            rtc_state = RCC_MM_CONFIG;
-                            xQueueSend(q_print, &msg_rtc_mm, portMAX_DELAY);
-                            break;
-                        case RCC_MM_CONFIG:
-                            min = getnumber(cmd->payload , cmd->len);
-                            time.MinuteUnits = min % 10;
-                            time.MinuteTens = (min - time.MinuteUnits)/10;
-                            rtc_state = RCC_SS_CONFIG;
-                            xQueueSend(q_print, &msg_rtc_ss, portMAX_DELAY);
-                            break;
-                        case RCC_SS_CONFIG:
-                            sec = getnumber(cmd->payload, cmd->len);
-                            time.SecondUnits = sec % 10;
-                            time.SecondTens = (sec - time.SecondUnits)/10;
-                            if(!validate_rtc_information(&time, NULL)){
-                                RTC_SetTime(time);
-                                xQueueSend(q_print, &msg_conf, portMAX_DELAY);
-                                show_time_date();
-                            }
-                            else{
-                                xQueueSend(q_print, &msg_invalid, portMAX_DELAY);
-                            }
-                            curr_state = sMainMenu;
-                            rtc_state = 0;
-                            break;
-                        default:
-                            break;
-                    }
+                    set_rtc_time(cmd);
                     break;
                 case sRtcDateConfig:
                     /* Get date, month, day, year info and configure RTC */
                     /* Take care of invalid entries */
-                    switch(rtc_state){
-                        case RCC_DATE_CONFIG:
-                            d = getnumber(cmd->payload, cmd->len);
-                            date.DateUnits = d % 10;
-                            date.DateTens = (d -date.DateUnits)/10;
-                            rtc_state = RCC_MONTH_CONFIG;
-                            xQueueSend(q_print, &msg_rtc_mo, portMAX_DELAY);
-                            break;
-                        case RCC_MONTH_CONFIG:
-                            month = getnumber(cmd->payload, cmd->len);
-                            date.MonthUnits = month % 10;
-                            date.MonthTens = (month - date.MonthUnits)/10;
-                            rtc_state = RCC_DAY_CONFIG;
-                            xQueueSend(q_print, &msg_rtc_dow, portMAX_DELAY);
-                            break;
-                        case RCC_DAY_CONFIG:
-                            day = getnumber(cmd->payload, cmd->len);
-                            date.WeekDayUnits = day;
-                            rtc_state = RCC_YEAR_CONFIG;
-                            xQueueSend(q_print, &msg_rtc_yr, portMAX_DELAY);
-                            break;
-                        case RCC_YEAR_CONFIG:
-                            year = getnumber(cmd->payload, cmd->len);
-                            date.YearUnits = year % 10;
-                            date.YearTens = (year - date.YearUnits)/10;
-                            if(!validate_rtc_information(NULL, &date)){
-                                RTC_SetDate(date);
-                                xQueueSend(q_print,&msg_conf, portMAX_DELAY);
-                                show_time_date();
-                            }
-                            else{
-                                xQueueSend(q_print, &msg_invalid, portMAX_DELAY);
-                            }
-                            curr_state = sMainMenu;
-                            rtc_state = 0;
-                            break;
-                        default:
-                            break;
-                    }
+                    set_rtc_date(cmd);
                     break;
                 case sRtcReport:
                     /* Enable or disable RTC current time reporting over ITM printf */
-                    if(cmd->len == 1){
-                        if(cmd->payload[0] == 'y'){
-                            if(xTimerIsTimerActive(rtc_timer) == pdFALSE)
-                                xTimerStart(rtc_timer, portMAX_DELAY);
-                        }
-                        else if(cmd->payload[0] == 'n'){
-                            xTimerStop(rtc_timer, portMAX_DELAY);
-                        }
-                        else{
-                            xQueueSend(q_print, &msg_invalid, portMAX_DELAY);
-                        }
-                    }
-                    else{
-                        xQueueSend(q_print, &msg_invalid, portMAX_DELAY);
-                    }
-                    curr_state = sMainMenu;
+                    set_rtc_report(cmd);
                     break;
                 default:
                     break;
@@ -267,6 +181,155 @@ void rtc_report_callback(TimerHandle_t xTimer){
 /***********************************************************************************************************/
 /*                                       Static Function Definitions                                       */
 /***********************************************************************************************************/
+
+static void proc_rtc_cmd(command_s* cmd){
+
+    const char *msg_rtc_hh = "Enter hour(1-12):";
+    const char *msg_rtc_dd  = "Enter date(1-31):";
+    const char *msg_rtc_report = "Enable time&date reporting(y/n)?: ";
+    uint8_t menu_code;
+
+    if(cmd->len == 1){
+        menu_code = cmd->payload[0] - 48;
+        switch(menu_code){
+            case 0:
+                curr_state = sRtcTimeConfig;
+                xQueueSend(q_print, &msg_rtc_hh, portMAX_DELAY);
+                break;
+            case 1:
+                curr_state = sRtcDateConfig;
+                xQueueSend(q_print, &msg_rtc_dd, portMAX_DELAY);
+                break;
+            case 2 :
+                curr_state = sRtcReport;
+                xQueueSend(q_print, &msg_rtc_report, portMAX_DELAY);
+                break;
+            case 3 :
+                curr_state = sMainMenu;
+                break;
+            default:
+                curr_state = sMainMenu;
+                xQueueSend(q_print ,&msg_invalid, portMAX_DELAY);
+        }
+    }
+    else{
+        curr_state = sMainMenu;
+        xQueueSend(q_print, &msg_invalid, portMAX_DELAY);
+    }
+}
+
+static void set_rtc_time(command_s* cmd){
+
+    const char *msg_rtc_mm = "Enter minutes(0-59):";
+    const char *msg_rtc_ss = "Enter seconds(0-59):";
+    static RTC_TimeState_t rtc_time_state = RTC_HH_CONFIG;
+    uint8_t hour, min, sec;
+    static RTC_Time_t time;
+
+    switch(rtc_time_state){
+        case RTC_HH_CONFIG:
+            hour = getnumber(cmd->payload, cmd->len);
+            time.HourUnits = hour % 10;
+            time.HourTens = (hour - time.HourUnits)/10;
+            rtc_time_state = RTC_MM_CONFIG;
+            xQueueSend(q_print, &msg_rtc_mm, portMAX_DELAY);
+            break;
+        case RTC_MM_CONFIG:
+            min = getnumber(cmd->payload , cmd->len);
+            time.MinuteUnits = min % 10;
+            time.MinuteTens = (min - time.MinuteUnits)/10;
+            rtc_time_state = RTC_SS_CONFIG;
+            xQueueSend(q_print, &msg_rtc_ss, portMAX_DELAY);
+            break;
+        case RTC_SS_CONFIG:
+            sec = getnumber(cmd->payload, cmd->len);
+            time.SecondUnits = sec % 10;
+            time.SecondTens = (sec - time.SecondUnits)/10;
+            if(!validate_rtc_information(&time, NULL)){
+                RTC_SetTime(time);
+                xQueueSend(q_print, &msg_conf, portMAX_DELAY);
+                show_time_date();
+            }
+            else{
+                xQueueSend(q_print, &msg_invalid, portMAX_DELAY);
+            }
+            curr_state = sMainMenu;
+            rtc_time_state = RTC_HH_CONFIG;
+            break;
+        default:
+            break;
+    }
+}
+
+static void set_rtc_date(command_s* cmd){
+
+    const char *msg_rtc_mo  ="Enter month(1-12):";
+    const char *msg_rtc_dow  = "Enter day(1-7 sun:1):";
+    const char *msg_rtc_yr  = "Enter year(0-99):";
+    static RTC_DateState_t rtc_date_state = RTC_HH_CONFIG;
+    static RTC_Date_t date;
+    uint8_t d, month, day, year;
+
+    switch(rtc_date_state){
+        case RTC_DATE_CONFIG:
+            d = getnumber(cmd->payload, cmd->len);
+            date.DateUnits = d % 10;
+            date.DateTens = (d -date.DateUnits)/10;
+            rtc_date_state = RTC_MONTH_CONFIG;
+            xQueueSend(q_print, &msg_rtc_mo, portMAX_DELAY);
+            break;
+        case RTC_MONTH_CONFIG:
+            month = getnumber(cmd->payload, cmd->len);
+            date.MonthUnits = month % 10;
+            date.MonthTens = (month - date.MonthUnits)/10;
+            rtc_date_state = RTC_DAY_CONFIG;
+            xQueueSend(q_print, &msg_rtc_dow, portMAX_DELAY);
+            break;
+        case RTC_DAY_CONFIG:
+            day = getnumber(cmd->payload, cmd->len);
+            date.WeekDayUnits = day;
+            rtc_date_state = RTC_YEAR_CONFIG;
+            xQueueSend(q_print, &msg_rtc_yr, portMAX_DELAY);
+            break;
+        case RTC_YEAR_CONFIG:
+            year = getnumber(cmd->payload, cmd->len);
+            date.YearUnits = year % 10;
+            date.YearTens = (year - date.YearUnits)/10;
+            if(!validate_rtc_information(NULL, &date)){
+                RTC_SetDate(date);
+                xQueueSend(q_print,&msg_conf, portMAX_DELAY);
+                show_time_date();
+            }
+            else{
+                xQueueSend(q_print, &msg_invalid, portMAX_DELAY);
+            }
+            curr_state = sMainMenu;
+            rtc_date_state = RTC_DATE_CONFIG;
+            break;
+        default:
+            break;
+    }
+}
+
+static void set_rtc_report(command_s* cmd){
+
+    if(cmd->len == 1){
+        if(cmd->payload[0] == 'y'){
+            if(xTimerIsTimerActive(rtc_timer) == pdFALSE)
+                xTimerStart(rtc_timer, portMAX_DELAY);
+        }
+        else if(cmd->payload[0] == 'n'){
+            xTimerStop(rtc_timer, portMAX_DELAY);
+        }
+        else{
+            xQueueSend(q_print, &msg_invalid, portMAX_DELAY);
+        }
+    }
+    else{
+        xQueueSend(q_print, &msg_invalid, portMAX_DELAY);
+    }
+    curr_state = sMainMenu;
+}
 
 static void show_time_date(void){
 
