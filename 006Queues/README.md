@@ -70,3 +70,82 @@ You can use minicom software to open a terminal (use the tty device correspondin
 sudo minicom -D /dev/ttyUSB0
 ```
 In order to watch the data in the right way you must enable ```Add Carriage Ret...U``` and ```local Echo on/off..E``` in the configuration menu (press Ctrl-A Z for entering in this menu).
+
+You can use SEGGER Systemview for debugging or testing the application.  
+- Here you find an example of LED configuration:
+
+  This is the terminal input/output for this example:
+  ```console
+  ========================
+  |         Menu         |
+  ========================
+  LED effect    ----> 0
+  Date and time ----> 1
+  Exit          ----> 2
+  Enter your choice here : 0
+  ========================
+  |      LED Effect      |
+  ========================
+  (none,e1,e2,e3,e4)
+  Enter your choice here : e1
+  ```
+  Here you find the snapshots of the Systemview:  
+  This is the call of the LED Effect menu (when 0 is introduced as option of the Menu in the terminal), the ISR is raising when the '\r' is send by the terminal:
+  
+  ![Alt text](doc/006Queues_call_led_task.png)
+  
+  This is the LED Effect selection (when e1 is introduced as option of the LED Effect in the terminal), the ISR is raising when the '\r' is send by the terminal:
+  
+  ![Alt text](doc/006Queues_led_task_cmd.png)
+  
+- Here you find an example of RTC configuration:
+
+  This is the terminal input/output for this example:
+  ```console
+  ========================
+  |         Menu         |
+  ========================
+  LED effect    ----> 0
+  Date and time ----> 1
+  Exit          ----> 2
+  Enter your choice here : 1
+  ========================
+  |         RTC          |
+  ========================
+
+  Current Time&Date:      12:13:51 [AM]
+                          99-01-01
+  Configure Time            ----> 0
+  Configure Date            ----> 1
+  Enable reporting          ----> 2
+  Exit                      ----> 3
+  Enter your choice here : 0
+  Enter hour(1-12):1
+  Enter minutes(0-59):1
+  Enter seconds(0-59):1
+  Enter 0 for AM or 1 for PM:1
+  Configuration successful
+
+  Current Time&Date:      01:01:01 [PM]
+                          99-01-01
+
+  ========================
+  |         Menu         |
+  ========================
+  LED effect    ----> 0
+  Date and time ----> 1
+  Exit          ----> 2
+  Enter your choice here : 
+  ```
+  Here you find the snapshots of the Systemview:  
+  This is the call of the RTC menu (when 1 is introduced as option of the Menu in the terminal), the ISR is raising when the '\r' is send by the terminal:
+  
+  ![Alt text](doc/006Queues_call_rtc_task.png)
+  
+  This is the hour configuration in the RTC (when 1 is introduced following the ```Enter hour(1-12):``` request message), the ISR is raising when the '\r' is send by the terminal:
+  
+  ![Alt text](doc/006Queues_rtc_task_set_hh.png)
+  
+  This is the end of the configuration time in the RTC (when 1 is introduced following the ``Enter 0 for AM or 1 for PM:``` request message), the ISR is raising when the '\r' is send by the terminal:
+  
+  ![Alt text](doc/006Queues_rtc_task_set_finish.png)
