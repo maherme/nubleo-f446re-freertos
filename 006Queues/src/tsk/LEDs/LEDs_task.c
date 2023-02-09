@@ -122,6 +122,7 @@ void LED_task_handler(void* parameters){
                           "Enter your choice here : ";
 
     for(;;){
+        SEGGER_SYSVIEW_PrintfTarget("LEDs Task");
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
         /* Print menu */
         xQueueSend(q_print, &msg_led, portMAX_DELAY);

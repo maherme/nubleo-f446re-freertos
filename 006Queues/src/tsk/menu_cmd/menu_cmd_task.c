@@ -67,6 +67,7 @@ void menu_task_handler(void* parameters){
                          "Enter your choice here : ";
 
     for(;;){
+        SEGGER_SYSVIEW_PrintfTarget("Menu Task");
         /* Print menu */
         xQueueSend(q_print, &msg_menu, portMAX_DELAY);
         /* Wait for commands */
@@ -105,6 +106,7 @@ void cmd_task_handler(void* parameters){
     command_s cmd;
 
     for(;;){
+        SEGGER_SYSVIEW_PrintfTarget("Command Task");
         ret = xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
         if(ret == pdTRUE){
             process_command(&cmd);

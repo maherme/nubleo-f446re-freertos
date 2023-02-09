@@ -134,6 +134,7 @@ void rtc_task_handler(void* parameters){
     command_s *cmd;
 
     for(;;){
+        SEGGER_SYSVIEW_PrintfTarget("RTC Task");
         /* Notify wait (wait till someone notifies) */
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
         /* Print the menu and show current date and time information */

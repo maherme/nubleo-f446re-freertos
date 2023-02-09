@@ -396,6 +396,7 @@ static void print_task_handler(void* parameters){
     uint32_t *msg;
 
     for(;;){
+        SEGGER_SYSVIEW_PrintfTarget("Print Task");
         xQueueReceive(q_print, &msg, portMAX_DELAY);
         (void)USART_SendData(&USART3Handle, (uint8_t*)msg, strlen((char*)msg));
     }
@@ -423,7 +424,9 @@ void Timer_ApplicationEventCallback(Timer_Num_t tim_num, Timer_Event_t timer_eve
 
 void USART3_Handler(void){
 
+    traceISR_ENTER();
     USART_IRQHandling(&USART3Handle);
+    traceISR_EXIT();
 }
 
 void USART_ApplicationEventCallback(USART_Handle_t* pUSART_Handle, uint8_t app_event){
